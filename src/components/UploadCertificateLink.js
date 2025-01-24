@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 
 function UploadCertificateLink() {
@@ -30,27 +32,10 @@ function UploadCertificateLink() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        backgroundColor: '#f8f9fa',
-      }}
-    >
-      <h2>Upload Certificate Link</h2>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '10px',
-        }}
-      >
-        <label htmlFor="certificateLink" style={{ fontWeight: 'bold' }}>
+    <div style={styles.container}>
+      <h3 style={styles.title}>Upload Certificate Link</h3>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <label htmlFor="certificateLink" style={styles.label}>
           Enter Certificate Link (PDF/Image):
         </label>
         <input
@@ -60,33 +45,77 @@ function UploadCertificateLink() {
           value={certificateLink}
           onChange={(e) => setCertificateLink(e.target.value)}
           style={{
-            padding: '10px',
-            width: '300px',
-            border: `1px solid ${isValid ? '#ccc' : 'red'}`,
-            borderRadius: '5px',
+            ...styles.input,
+            border: `1px solid ${isValid ? '#ced4da' : '#e63946'}`,
           }}
         />
-        {!isValid && (
-          <span style={{ color: 'red', fontSize: '12px' }}>
-            Please enter a valid URL ending with .pdf, .jpg, .jpeg, or .png.
-          </span>
-        )}
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
+        {!isValid && <span style={styles.error}>Invalid URL. Use .pdf, .jpg, .jpeg, or .png.</span>}
+        <button type="submit" style={styles.button}>
           Upload
         </button>
       </form>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '20px',
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    maxWidth: '280px',
+    margin: '50px auto',
+  },
+  title: {
+    marginBottom: '15px',
+    fontSize: '1.2rem',
+    fontWeight: '600',
+    color: '#495057',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    width: '100%',
+  },
+  label: {
+    fontWeight: '500',
+    fontSize: '0.9rem',
+    color: '#495057',
+    textAlign: 'center',
+  },
+  input: {
+    padding: '8px',
+    width: '100%',
+    maxWidth: '250px',
+    fontSize: '0.85rem',
+    borderRadius: '4px',
+    border: '1px solid #ced4da',
+    outline: 'none',
+  },
+  error: {
+    fontSize: '0.75rem',
+    color: '#e63946',
+    marginTop: '-5px',
+  },
+  button: {
+    padding: '8px 16px',
+    backgroundColor: '#007bff',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+  buttonHover: {
+    backgroundColor: '#0056b3',
+  },
+};
 
 export default UploadCertificateLink;

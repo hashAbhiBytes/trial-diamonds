@@ -1,5 +1,7 @@
+
 .App {
   text-align: center;
+ 
 }
 
 .App-logo {
@@ -35,4 +37,18 @@
   to {
     transform: rotate(360deg);
   }
+}
+/* body {
+  background-color: #C0D0D8;
+  margin: 0;
+  color: white;
+} */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #c3c7ce, #260247); /* Gradient Background */
+  /* height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center; */
 }
