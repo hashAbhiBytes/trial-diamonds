@@ -1,49 +1,42 @@
-
-import './App.css';
-import AddProduct from './components/AddProduct';
-import Home from './components/Home';
-import NavBar from './components/NavBar';
-import Explore from './components/Explore';
-import MyListing from './components/MyListing';
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-
-} from "react-router-dom";
-import SearchBar from './components/SearchBar';
+import React, { useState } from "react"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import NavBar from "./components/NavBar"
+import Home from "./components/Home"
+import MyListing from "./components/MyListing"
+import Explore from "./components/Explore"
+import AddProduct from "./components/AddProduct"
+import SearchBar from "./components/SearchBar"
+import "./App.css"
+import "./components/styles.css"
 
 function App() {
-  const handleSearch = (query) => {
-    console.log("Search query:", query);
-    // Add your logic for handling the search query
-  };
+  const [searchResults, setSearchResults] = useState([])
+
+  const handleSearch = async (query) => {
+    try {
+      console.log("Searching for:", query)
+      setSearchResults([])
+    } catch (error) {
+      console.error("Search error:", error)
+    }
+  }
+
   return (
-    <>
     <Router>
-    <NavBar/>
-    <SearchBar placeholder="Search for something..." onSearch={handleSearch} />
-    <div className="container my-3">
-      <Routes>
-      <Route exact path="/"
-            element={<Home/>}
-          />
-          <Route exact path="/add"
-            element={<AddProduct/>}
-          />
-      <Route exact path="/explore"
-            element={<Explore/>}
-          />
-      <Route exact path="/my"
-            element={<MyListing/>}
-          />
-    
-    </Routes>
-    </div>
+      <div className="App">
+        <NavBar />
+        <SearchBar placeholder="Search diamonds..." onSearch={handleSearch} />
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/my" element={<MyListing />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/add" element={<AddProduct />} />
+          </Routes>
+        </div>
+      </div>
     </Router>
-    </>
-  );
+  )
 }
 
-export default App;
+export default App
