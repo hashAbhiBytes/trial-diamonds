@@ -1,10 +1,8 @@
 
-
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaGem, FaSignOutAlt } from 'react-icons/fa'; // Import icons
-import './Navbar.css'; // Include the custom CSS for additional styling
+import { FaWallet, FaSearch } from 'react-icons/fa';
+import './style.css';
 
 export default function Navbar() {
     return (

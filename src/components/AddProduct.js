@@ -1,66 +1,151 @@
-import React, { useState } from "react"
-import { addDiamond, formatTransactionError } from "./Ethers"
-import UploadImg from "./UploadImg"
-import NumberInput from "./NumberInput"
-import UploadCertificateLink from "./UploadCertificateLink"
+import React, { useState } from 'react'
+import { ethers } from 'ethers'
+import { connectToMetaMask, getDiamondContract } from '../utils/web3'
+import { uploadToIPFS } from '../utils/ipfs'
 
-export default function AddProduct() {
-  const [diamondName, setDiamondName] = useState("")
-  const [price, setPrice] = useState("")
-  const [certificateHash, setCertificateHash] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+function AddProduct() {
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    certification: '',
+    image: null
+  })
 
-  const handleSave = async () => {
-    if (!diamondName || !price || !certificateHash) {
-      setError("Please fill in all the fields before saving!")
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file && file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      e.target.value = ''
       return
     }
+    setFormData(prev => ({
+      ...prev,
+      image: file
+    }))
+  }
 
-    setIsLoading(true)
-    setError(null)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsRegistering(true)
 
     try {
-      const tx = await addDiamond(diamondName, price, certificateHash)
-      await tx.wait()
-      alert("Diamond added successfully to the blockchain!")
+      // Upload image to IPFS
+      setUploadProgress('Uploading image to IPFS...')
+      const imageUrl = await uploadToIPFS(formData.image)
+      
+      // Connect to MetaMask and get contract
+      setUploadProgress('Connecting to wallet...')
+      const signer = await connectToMetaMask()
+      const contract = await getDiamondContract(signer)
 
-      // Reset form fields
-      setDiamondName("")
-      setPrice("")
-      setCertificateHash("")
+      // Register diamond on blockchain
+      setUploadProgress('Registering diamond on blockchain...')
+      const tx = await contract.registerDiamond(
+        formData.name,
+        ethers.utils.parseEther(formData.price),
+        formData.certification,
+        imageUrl
+      )
+
+      setUploadProgress('Waiting for transaction confirmation...')
+      await tx.wait()
+      
+      alert('Diamond registered successfully!')
+      
+      // Reset form
+      setFormData({
+        name: '',
+        price: '',
+        certification: '',
+        image: null
+      })
+      
+      // Reset file input
+      const fileInput = document.querySelector('input[type="file"]')
+      if (fileInput) fileInput.value = ''
+      
     } catch (error) {
-      console.error("Error adding diamond:", error)
-      setError(formatTransactionError(error))
+      console.error('Error registering diamond:', error)
+      alert('Error registering diamond: ' + error.message)
     } finally {
-      setIsLoading(false)
+      setIsRegistering(false)
+      setUploadProgress('')
     }
   }
 
   return (
-    <div className="add-product">
-      <h2>Add New Diamond</h2>
-      <UploadCertificateLink onUpload={setCertificateHash} />
-      <NumberInput label="Price (ETH)" onInputChange={setPrice} />
-      <UploadImg onUpload={setDiamondName} />
-      {error && <div className="error">{error}</div>}
-      <div className="button-group">
-        <button type="button" className="btn btn-primary" onClick={handleSave} disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save"}
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => {
-            setDiamondName("")
-            setPrice("")
-            setCertificateHash("")
-            setError(null)
-          }}
+    <div className="add-product-container">
+      <form onSubmit={handleSubmit} className="add-product-form">
+        <div className="form-group">
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            disabled={isRegistering}
+          />
+        </div>
+        <div className="form-group">
+          <label>Price (ETH):</label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            required
+            step="0.001"
+            min="0"
+            disabled={isRegistering}
+          />
+        </div>
+        <div className="form-group">
+          <label>Certification:</label>
+          <input
+            type="text"
+            name="certification"
+            value={formData.certification}
+            onChange={handleInputChange}
+            required
+            disabled={isRegistering}
+          />
+        </div>
+        <div className="form-group">
+          <label>Image (max 5MB):</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            required
+            disabled={isRegistering}
+          />
+        </div>
+        {uploadProgress && (
+          <div className="upload-progress">
+            {uploadProgress}
+          </div>
+        )}
+        <button 
+          type="submit" 
+          disabled={isRegistering}
+          className={`submit-button ${isRegistering ? 'loading' : ''}`}
         >
-          Discard
+          {isRegistering ? 'Processing...' : 'Register Diamond'}
         </button>
-      </div>
+      </form>
     </div>
   )
 }
+
+export default AddProduct

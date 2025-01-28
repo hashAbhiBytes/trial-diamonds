@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import './style.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import NavBar from "./components/NavBar"
 import Home from "./components/Home"
@@ -6,8 +7,6 @@ import MyListing from "./components/MyListing"
 import Explore from "./components/Explore"
 import AddProduct from "./components/AddProduct"
 import SearchBar from "./components/SearchBar"
-import "./App.css"
-import "./components/styles.css"
 
 function App() {
   const [searchResults, setSearchResults] = useState([])

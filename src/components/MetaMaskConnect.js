@@ -1,38 +1,54 @@
-import React, { useState } from "react"
-import { ethers } from "ethers"
+import React, { useState, useEffect } from 'react'
+import { connectToMetaMask } from '../utils/web3'
 
-const MetaMaskConnect = ({ setAccount, onError }) => {
-  const [loading, setLoading] = useState(false)
+function MetaMaskConnect() {
+  const [account, setAccount] = useState('')
+  const [isConnecting, setIsConnecting] = useState(false)
 
-  const connectToMetaMask = async () => {
-    setLoading(true)
+  useEffect(() => {
+    // Listen for account changes
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0) {
+          setAccount(accounts[0])
+        } else {
+          setAccount('')
+        }
+      })
+    }
+  }, [])
+
+  const handleConnect = async () => {
+    setIsConnecting(true)
     try {
-      if (typeof window.ethereum === "undefined") {
-        throw new Error("MetaMask is not installed. Please install it to proceed.")
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      await provider.send("eth_requestAccounts", [])
-      const signer = await provider.getSigner()
-      const account = await signer.getAddress()
-      setAccount(account)
-
-      console.log("Connected account:", account)
+      const signer = await connectToMetaMask()
+      const address = await signer.getAddress()
+      setAccount(address)
     } catch (error) {
-      console.error("Error connecting to MetaMask:", error)
-      onError(error.message || "Failed to connect to MetaMask")
+      console.error('Connection error:', error)
+      alert('Failed to connect to MetaMask')
     } finally {
-      setLoading(false)
+      setIsConnecting(false)
     }
   }
 
   return (
-    <div className="metamask-connect">
-      <button onClick={connectToMetaMask} disabled={loading}>
-        {loading ? "Connecting..." : "Connect Wallet"}
-      </button>
+    <div>
+      {account ? (
+        <div>
+          Connected: {account.slice(0, 6)}...{account.slice(-4)}
+        </div>
+      ) : (
+        <button 
+          onClick={handleConnect}
+          disabled={isConnecting}
+          className="connect-button"
+        >
+          {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+        </button>
+      )}
     </div>
   )
 }
 
-export default MetaMaskConnect;
+export default MetaMaskConnect
